@@ -61,6 +61,9 @@ jobs:
       - name: Validate CODEOWNERS
         run: make check_codeowners
 
+      - name: Check interface version parity
+        run: make check_interface_parity
+
       - name: Make All
         run: make fmt check clippy test test_scripts check_codeowners
 

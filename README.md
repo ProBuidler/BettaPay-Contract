@@ -25,7 +25,11 @@ BettaPay-Contract/
 │   └── src/lib.rs
 ├── scripts/
 │   ├── deploy_testnet.sh       # Build + deploy both contracts + init admin
-│   └── simulate.sh             # Simulate contract calls locally
+│   ├── simulate.sh             # Simulate contract calls locally
+│   ├── export_events.sh        # Dump contract events over a ledger range
+│   ├── list_pending_ops.sh     # Show pending timelocked operations
+│   ├── verify_wasm_hash.sh     # Compare deployed Wasm hash to local build
+│   └── check_interface_parity.sh # Fail when the two contracts' interface versions drift
 └── DEVELOPMENT.md              # Upgrade and storage-migration guide
 ```
 
@@ -380,6 +384,30 @@ soroban contract invoke --id "$SETTLEMENT_ID" --source-account bettapay-admin \
 # Example output: {platform: 2500, network: 500, merchant: 7000}
 ```
 
+
+## Operator Scripts
+
+Operator-facing helper scripts (full flags documented in each script's `--help`):
+
+```bash
+# Verify a deployed contract matches the local optimized Wasm artifact
+bash scripts/verify_wasm_hash.sh --contract-id "$SETTLEMENT_ID" \
+  --wasm target/optimized/settlement_contract_opt.wasm
+
+# Export contract events over a ledger range to JSON or CSV
+# (re-uses soroban_events.py helpers; --from-file replays a saved response)
+bash scripts/export_events.sh --contract-id "$SETTLEMENT_ID" \
+  --start-ledger 1000 --end-ledger 3000 --format csv --output events.csv
+
+# List pending timelocked operations (from op_scheduled/op_executed/op_cancelled events)
+bash scripts/list_pending_ops.sh --contract-id "$SETTLEMENT_ID" --format table
+
+# Fail when the two contracts advertise different interface versions
+make check_interface_parity
+```
+
+Event topic names are decoded against the constants in `bettapay_common/src/events.rs`
+so exporters and indexers cannot drift from the contracts.
 
 ## Detailed API Specification
 

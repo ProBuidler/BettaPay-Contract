@@ -29,6 +29,21 @@ clean:
 	cargo clean
 	@rm -rf target/optimized
 
+# Operator tooling targets that need runtime arguments accept a $(ARGS)
+# passthrough, e.g.: make verify_wasm_hash ARGS=--contract-id CAA...
+.PHONY: check_interface_parity verify_wasm_hash export_events list_pending_ops
+check_interface_parity:
+	@bash scripts/check_interface_parity.sh
+
+verify_wasm_hash:
+	@bash scripts/verify_wasm_hash.sh $(ARGS)
+
+export_events:
+	@bash scripts/export_events.sh $(ARGS)
+
+list_pending_ops:
+	@bash scripts/list_pending_ops.sh $(ARGS)
+
 .PHONY: fmt test check clippy print_msrv msrv doc check_snapshots test_scripts wasm_size check_codeowners all
 
 fmt:
@@ -68,4 +83,4 @@ wasm_size: optimize
 check_codeowners:
 	bash scripts/check_codeowners.sh
 
-all: fmt check clippy test check_snapshots test_scripts check_codeowners
+all: fmt check clippy test check_snapshots test_scripts check_codeowners check_interface_parity
